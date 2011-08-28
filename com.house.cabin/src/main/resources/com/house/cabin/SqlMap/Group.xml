@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="group">
+
+	<!-- Usable Sqls  -->
+	<select id="getChatWallLiteByDate" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		select A.g_code, A.m_code, A.u_code, A.message, A.write_date_time, B.name, B.photo_path  
+			from `house`.message_repository as A, `house`.user_info as B 
+			where g_code = $g_code$ and A.u_code=B.u_code and write_date_time > #write_date_time# 
+			order by m_code;
+		]]>
+	</select>
+	
+	<select id="getAllChatWallByWriteDate" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			select A.g_code, A.m_code, A.u_code, A.message, A.write_date_time, B.name, B.photo_path  
+			from `house`.message_repository as A, `house`.user_info as B 
+			where g_code = $g_code$ and A.u_code=B.u_code and write_date_time > #write_date_time# 
+			order by m_code;
+		]]>
+	</select>
+	
+	<select id="getGroupJoinDate" parameterClass="java.util.HashMap"
+	resultClass="java.util.HashMap">
+		<![CDATA[
+		select g_code, group_join_date from house.group_member_info where g_code=$g_code$
+and u_code = (select u_code from house.user_info where phone_number = #phone_number#)
+		]]>
+	</select>
+	
+	
+	<update id="updateGroupName" parameterClass="java.util.HashMap">
+		<![CDATA[
+		UPDATE `house`.`group_info` SET 
+		`group_name`=#group_name# WHERE `g_code`=$g_code$;		
+		]]>
+	</update>
+	
+	<delete id="withdrawFromGroup" parameterClass="java.util.HashMap">
+		<![CDATA[
+		delete from house.group_member_info 
+		where g_code = $g_code$ and u_code = (select u_code from user_info
+											  where phone_number = #phone_number#)
+		]]>
+	</delete>
+	
+	<delete id="deleteGroup" parameterClass="java.util.HashMap">
+		<![CDATA[
+			delete from house.group_info
+			where g_code = $g_code$ and leader_u_code = (select u_code from user_info
+															where phone_number = #phone_number#)
+		]]>
+	</delete>
+	
+	<select id="getGroupLite" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		SELECT A.g_code, A.group_name, B.`name`, A.`leader_u_code`
+		FROM `house`.`group_info` AS A, `house`.`user_info` as B
+		WHERE G_CODE IN (SELECT G_CODE
+						 FROM `house`.`group_member_info` 
+						 WHERE U_CODE = (SELECT U_CODE 
+						 				 FROM `house`.`user_info`
+						 				 WHERE PHONE_NUMBER = #phone_number#
+						 				)
+						)
+          And A.leader_u_code = B.u_code 
+		]]>
+	</select>
+	
+	
+	
+	
+	<!-- Deprecated  -->
+	
+
+
+	<select id="getGroup" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		SELECT * 
+		FROM group_info
+		WHERE G_CODE IN (SELECT G_CODE
+						 FROM group_member_info
+						 WHERE U_CODE = (SELECT U_CODE
+						 				 FROM user_info
+						 				 WHERE PHONE_NUMBER = #phone_number#
+						 				)
+						) 
+		]]>
+	</select>
+	
+	<select id="getChatWall" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			select A.m_code, A.u_code, A.message, A.write_date_time, B.name, B.photo_path  
+			from message_repository as A, user_info as B 
+			where g_code = $g_code$ and A.u_code=B.u_code
+			order by m_code desc LIMIT $i$, $j$;
+		]]>
+	</select>
+	<select id="getChatWallLite" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			select A.g_code, A.m_code, A.u_code, A.message, A.write_date_time, B.name, B.photo_path  
+			from `house`.message_repository as A, `house`.user_info as B 
+			where g_code = $g_code$ and A.u_code=B.u_code and m_code>$m_code$
+			order by m_code;
+		]]>
+	</select>
+	<select id="getAllChatWall" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			select A.g_code, A.m_code, A.u_code, A.message, A.write_date_time, B.name, B.photo_path  
+			from `house`.message_repository as A, `house`.user_info as B 
+			where g_code = $g_code$ and A.u_code=B.u_code and m_code>$m_code$
+			order by m_code;
+		]]>
+	</select>
+	
+	<select id="getGroupMember" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			SELECT u_code, phone_number, name, photo_path 
+			FROM user_info 
+			WHERE U_CODE IN (SELECT U_CODE 
+						     FROM group_member_info 
+						     WHERE G_CODE=$g_code$)
+		]]>
+	</select>
+	<select id="getGroupMemberLite" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			SELECT B.g_code, A.u_code, A.phone_number, A.name, A.photo_path 
+			FROM user_info as A, house.group_member_info as B
+			WHERE A.U_CODE = B.U_code and B.g_code = $g_code$
+            order by A.u_code
+		]]>
+	</select>
+	<select id="getGroupMemeberRegistrationId" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			SELECT registration_id from user_info
+			WHERE U_CODE IN (SELECT U_CODE 
+						     FROM group_member_info 
+						     WHERE G_CODE=$g_code$) and u_code != $u_code$
+		]]>
+	</select>
+	<select id="getMemeberRegistrationId" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+			SELECT registration_id from user_info
+			WHERE phone_number = #phone_number#
+		]]>
+	</select>
+	
+	
+	
+	<select id="getWhoOfMessage" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		
+			Select A.`u_code`, A.`name`, B.`group_name` from `house`.`user_info` as A, `house`.`group_info` as B where A.u_code = (
+			SELECT u_code from `house`.`message_repository`
+			where `m_code` = $m_code$) and B.`g_code` = (Select g_code from `house`.`message_repository` where `m_code` = $m_code$)
+		]]>
+					<!--SELECT A.NAME, B.GROUP_NAME 
+			FROM USER_INFO as A, GROUP_INFO as B 
+			WHERE A.U_CODE = (SELECT U_CODE 
+							  FROM MESSAGE_REPOSITORY
+							  WHERE M_CODE = $m_code$) 
+			AND B.G_CODE = (SELECT G_CODE 
+							FROM MESSAGE_REPOSITORY
+						    WHERE `M_CODE` = $m_code$)-->
+		
+	</select>
+	
+	
+	
+	<insert id="makeGroup" parameterClass="java.util.HashMap">
+		<![CDATA[
+		INSERT 
+		INTO group_info(GROUP_NAME, MAKE_DATE, LEADER_U_CODE, IS_PRIVATE)
+		VALUES (#group_name#, NOW(), ( SELECT U_CODE
+									  FROM user_info
+									  WHERE PHONE_NUMBER = #phone_number# ), $is_private$ )
+		]]>
+		<selectKey keyProperty="id" resultClass="Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<insert id="inviteGroup" parameterClass="java.util.HashMap">
+		<![CDATA[
+		
+		insert 
+		into `house`.`group_invitation_list` (g_code, from_u_code, phone_number, invite_date, state)
+		values ($g_code$, (select u_code from `house`.`user_info` where phone_number=#phone_number#), #invite_phone_number#, now(), 'wait')
+		
+		]]>
+		<selectKey keyProperty="id" resultClass="Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<insert id="joinGroup" parameterClass="java.util.HashMap">
+		<![CDATA[
+		INSERT		
+		INTO group_member_info(G_CODE, U_CODE, GROUP_JOIN_DATE)
+		VALUES($g_code$, ( SELECT U_CODE
+									  FROM user_info
+									  WHERE PHONE_NUMBER = #phone_number# ), NOW() )
+		]]>
+		<selectKey keyProperty="id" resultClass="Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<insert id="writeChatWall" parameterClass="java.util.HashMap">
+		<![CDATA[
+		INSERT INTO `house`.`message_repository` (`g_code`, `u_code`, `message`, `write_date_time`) 
+			VALUES ($g_code$, (Select u_code from `house`.`user_info` where phone_number=#phone_number#), #message#, now());
+		]]>
+		<selectKey keyProperty="id" resultClass="Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<select id="isHeGroupMember" parameterClass="java.util.HashMap" resultClass="Integer">
+		<![CDATA[
+		select count(*) from `house`.`group_member_info`
+		where g_code=$g_code$ and u_code = (select u_code from `house`.`user_info` where phone_number=#invite_phone_number#)
+		]]>
+	</select>
+	
+	<select id="isInvitationExist" parameterClass="java.util.HashMap" resultClass="Integer">
+		<![CDATA[
+		select count(*) from `house`.`group_invitation_list` 
+		where phone_number=#invite_phone_number# and g_code=$g_code$
+		]]>
+	</select>
+	
+	
+</sqlMap>

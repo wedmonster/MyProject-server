@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="user">
+
+
+
+	<!-- using -->
+	
+	<update id="updateUserName" parameterClass="java.util.HashMap" >
+		<![CDATA[
+		UPDATE `user_info` SET `name`=#name# WHERE `phone_number`=#phone_number#
+		]]>
+	</update>
+	
+	<select id="getUserInfo" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		select u_code, phone_number, name, join_date, photo_path from user_info where phone_number = #phone_number# 
+		]]>
+	</select>
+	
+	<select id="test.test" resultClass="java.util.HashMap">
+		<![CDATA[
+		select * from user_info;
+		]]>
+	</select>
+	
+	<select id="isHeMember?" parameterClass="java.util.HashMap" resultClass="Integer">
+		<![CDATA[
+			SELECT count(*) 
+			FROM user_info
+			WHERE PHONE_NUMBER = #phone_number#				  
+		]]>
+	</select>
+	
+	
+	<!-- deprecated  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	<insert id="joinAsApp" parameterClass="com.house.cabin.user.UserBean">
+		<![CDATA[
+			INSERT 
+			INTO user_info(`PHONE_NUMBER`, `NAME`, `JOIN_DATE`)
+			VALUES (#phone_number#, #name#, NOW())			
+		]]>
+	</insert>
+	<select id="getInvitationList" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		select A.invitation_id, B.group_name, C.`name`, A.invite_date, A.state
+		from `group_invitation_list` as A, `group_info` as B, `user_info` as C 
+		where A.phone_number=#phone_number# AND A.g_code = B.g_code and C.u_code = A.from_u_code
+		
+		]]>
+	</select>
+	<insert id="joinGroupMember" parameterClass="java.util.HashMap" >
+		<![CDATA[
+		insert into `group_member_info`(g_code, u_code, group_join_date)
+		values ((select g_code from `group_invitation_list` where `invitation_id`=$invitation_id$)
+        ,(select `u_code` from `user_info` where phone_number = (select phone_number from `group_invitation_list` where `invitation_id`=$invitation_id$))
+        , now())
+		]]>
+		<selectKey keyProperty="id" resultClass="Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<delete id="deleteInvitation" parameterClass="java.util.HashMap">
+		<![CDATA[
+		delete from `group_invitation_list` where invitation_id=$invitation_id$
+		]]>
+	</delete>
+	<update id="updateRegistrationId" parameterClass="java.util.HashMap">
+		<![CDATA[
+		UPDATE `user_info` SET `registration_id`=#registration_id# WHERE `phone_number`=#phone_number#;
+		]]>
+	</update>
+	<select id="getMaxCode" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		<![CDATA[
+		select g_code, MAX(m_code) from message_repository
+		where g_code = (select g_code from group_member_info where member_id = $member_id$);
+		
+	]]>	
+	</select>
+	
+	<select id="getJoinDate" parameterClass="java.util.HashMap"
+	resultClass="java.util.HashMap">
+		<![CDATA[
+		select g_code, group_join_date from group_member_info
+		where member_id = $member_id$;
+		]]>
+		
+	</select>
+	
+</sqlMap>

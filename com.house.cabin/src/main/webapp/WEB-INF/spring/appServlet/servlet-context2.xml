@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<!-- <annotation-driven /> -->
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<!-- <resources mapping="/resources/**" location="/resources/" /> -->	
+	 
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	 	 	<property name="prefix" value="/WEB-INF/views/"></property>
+			<property name="suffix" value=".jsp" />
+	</bean>
+	
+	<!-- Imports user-defined @Controller beans that process client requests -->
+	<import resource="controllers.xml" />	
+	<bean id="loginCheckInterceptor" class="com.house.cabin.util.LoginCheckInterceptor"/>
+
+	<bean id="UrlHandlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+	
+   <!-- interceptor 추가 -->
+  <property name="interceptors">
+   <list>
+    <ref bean="loginCheckInterceptor" />
+   </list>
+  </property>
+ 
+  <property name="alwaysUseFullPath" value="true" />
+  
+  <property name="mappings">
+   <props>
+  <prop key="/test.do">UserController</prop>
+    
+   </props>
+  </property>
+
+	</bean>	
+	  
+</beans>
+
